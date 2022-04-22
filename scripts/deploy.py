@@ -3,7 +3,7 @@ from scripts.tools import *
 import json
 import os,sys
 import random
-import city_zone
+import scripts.city_zone
 
 D18= 10**18
 ZERO= '0x0000000000000000000000000000000000000000'

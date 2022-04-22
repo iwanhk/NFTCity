@@ -3,13 +3,15 @@ from scripts.tools import *
 import json
 import os,sys
 import random
-import city_zone
+from scripts.city_zone import *
 
 D18= 10**18
 ZERO= '0x0000000000000000000000000000000000000000'
 active_network= network.show_active()
 LANG=["af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg", "ca", "ceb", "ny", "zh-cn", "zh-tw", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "tl", "fi", "fr", "fy", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "iw", "he", "hi", "hmn", "hu", "is", "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "ko", "ku", "ky", "lo", "la", "lv", "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "my", "ne", "no", "or", "ps", "fa", "pl", "pt", "pa", "ro", "ru", "sm", "gd", "sr", "st", "sn", "sd", "si", "sk", "sl", "so", "es", "su", "sw", "sv", "tg", "ta", "te", "th", "tr", "uk", "ur", "ug", "uz", "vi", "cy", "xh", "yi", "yo", "zu"];
 ipfs='https://bafybeie3mhgs5mf236vwkdehwyrnvmmo5shezlpir7pdioccuqt6euxtum.ipfs.nftstorage.link/'
+
+DATADIR='data/'
 
 def process_city(meta_file:str):
     with open(meta_file,'r') as load_f:
@@ -27,14 +29,14 @@ def process_city(meta_file:str):
     return (names_list, lan_list)
 
 def mint(city, cityDict, nft, reveal, user):
-    with open('deployed.json', 'r') as deployed_file:
+    with open(DATADIR+ 'deployed.json', 'r') as deployed_file:
         history= json.load(deployed_file)
     if city in history:
         print(f"{city} in history, pass")
         return
-    file_name=os.path.join(r"../python/city_meta", city+'.ot.json')
+    file_name=os.path.join(DATADIR+ "city_meta", city+'.ot.json')
     names_list, lan_list= process_city(file_name)
-    city_name, zone, now_time= city_zone.query(city, cityDict)
+    city_name, zone, now_time= query(city, cityDict)
     if now_time==None:
         print(f"{city} cannot be found in cityZone, pass")
         return
@@ -46,7 +48,7 @@ def mint(city, cityDict, nft, reveal, user):
     print(f"Minting NFT {city} ...")
     nft.mint(names_list, zoneDiff, lan_list, reveal, addr(user))
     history[city]= nft.totalSupply()
-    with open('deployed.json', 'w') as deployed_file:
+    with open(DATADIR+ 'deployed.json', 'w') as deployed_file:
         json.dump(history, deployed_file)
         
 
@@ -54,9 +56,9 @@ def main():
     active_network= network.show_active()
     print("Current Network:"+ active_network)
 
-    cityDict= city_zone.initDataBase()
+    cityDict= initDataBase()
 
-    g = os.walk(r"../python/city_meta")
+    g = os.walk(DATADIR+ "city_meta")
 
     cities=[]
     for path,dir_list,file_list in g:  

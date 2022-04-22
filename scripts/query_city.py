@@ -2,8 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-import city_zone 
-    
+import scripts.city_zone 
     
 if __name__=='__main__':
     dic= city_zone.initDataBase()
