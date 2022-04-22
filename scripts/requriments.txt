@@ -1,0 +1,5 @@
+svgwrite
+tqdm
+json
+googletrans==4.0.0rc1
+concurrent
