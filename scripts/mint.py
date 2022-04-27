@@ -96,7 +96,7 @@ def main():
         
             nft.setIPFSPrefix(ipfs, addr(admin))
             
-        if active_network == 'bsc-main':
+        if active_network == 'bsc-main' or active_network== 'mainnet' :
             accounts.add(config['wallets']['admin'])
             accounts.add(config['wallets']['creator'])
             accounts.add(config['wallets']['consumer'])
@@ -104,6 +104,15 @@ def main():
             admin= accounts[0]
             creator= accounts[1]
             consumer= accounts[2]
+
+            nft= CivCityNFT[-1]
+            cities=['New York', 'Singapore', 'London', 'Paris', 'Tokyo']
+            for city in cities:
+                mint(city, cityDict, nft, True, admin)
+
+            #mint(cities[0], cityDict, nft, True, admin)
+        
+            nft.setIPFSPrefix(ipfs, addr(admin))
 
     except Exception:
         console.print_exception()

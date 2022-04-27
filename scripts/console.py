@@ -70,7 +70,7 @@ def main():
             nft= CivCityNFT[-1]
 
 
-        if active_network == 'bsc-main':
+        if active_network == 'bsc-main' or active_network== 'mainnet' :
             accounts.add(config['wallets']['admin'])
             accounts.add(config['wallets']['creator'])
             accounts.add(config['wallets']['consumer'])
@@ -78,6 +78,8 @@ def main():
             admin= accounts[0]
             creator= accounts[1]
             consumer= accounts[2]
+
+            nft= CivCityNFT[-1]
 
     except Exception:
         console.print_exception()

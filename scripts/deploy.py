@@ -4,6 +4,7 @@ import json
 import os,sys
 import random
 import scripts.city_zone
+import solcx
 
 D18= 10**18
 ZERO= '0x0000000000000000000000000000000000000000'
@@ -14,6 +15,7 @@ LANG=["af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg", "ca", "c
 def main():
     active_network= network.show_active()
     print("Current Network:"+ active_network)
+    solcx.set_solc_version('0.8.13')
     
     try:
         if active_network== 'bsc-test' or active_network== 'rinkeby' :
@@ -38,7 +40,7 @@ def main():
             #nft= CivCityNFT.deploy(addr(admin))
             admin.deploy(contract=CivCityNFT, publish_source=True)
             
-        if active_network == 'bsc-main':
+        if active_network == 'bsc-main' or active_network== 'mainnet' :
             accounts.add(config['wallets']['admin'])
             accounts.add(config['wallets']['creator'])
             accounts.add(config['wallets']['consumer'])
@@ -47,13 +49,10 @@ def main():
             creator= accounts[1]
             consumer= accounts[2]
 
-            if len(Random)==0:
-                Random.deploy(addr(admin))
-            if len(SVG)==0:
-                SVG.deploy(addr(admin))
-            if len(DateTime)==0:
-                DateTime.deploy(addr(admin))
-            nft= CivCityNFT.deploy(addr(admin))
+            #admin.deploy(contract=Random, publish_source=True)
+            #admin.deploy(contract=DateTime, publish_source=True)
+            #admin.deploy(contract=SVG, publish_source=True)
+            admin.deploy(contract=CivCityNFT, publish_source=True)
 
     except Exception:
         console.print_exception()

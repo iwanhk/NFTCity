@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-// Amended by HashLips
+// Amended by Iwan
 /**
 OpeaSea Metadata:
 {
