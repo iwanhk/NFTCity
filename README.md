@@ -172,5 +172,15 @@ Key features:
 Smart Contract Functions (to tokenId):
 
 - setMainLang: set your own language
-- reveal: reveal/unreveal this NFT
 - showAnimation: Show/Hide GIF Animation
+
+root : 0x4a8d100c5b3c09841808d8fe60f6e7ce0812e6154420676e08030af0ad9b43fc
+
+Admin 0x7B0dc23E87febF1D053E7Df9aF4cce30F21fAe9C:
+0x248ac1f01201ebad7020ea2c3e1b2fdf454040932298e8947f9ffb61e8de51a2,0x91a8ee7c5b8062ff383207a299bf57fda043b5785fd32b35fe1a757a9c52abbf
+
+Creator 0x8531fEaAcD66599102adf9C5f701E6C490f44f1C:
+0x869e65de98ffe6d41241bd4a4149d7152f7ecbe9627441c85862fdeffaa7b05a,0x91a8ee7c5b8062ff383207a299bf57fda043b5785fd32b35fe1a757a9c52abbf
+
+Consumer 0xAb1fdD3F84b2019BEF47939E66fb6194532f9640:
+0xc6fa5ccdc8ab39e4d4daca36f8694c30d4bd3c67febddf13d0f8083d1d24c504

@@ -7,4 +7,6 @@ reports/
 data/gif/
 data/png/
 data/svg/
+node_modules
 *.zip
+package-lock.json

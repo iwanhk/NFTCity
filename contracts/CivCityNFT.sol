@@ -1,41 +1,70 @@
 // SPDX-License-Identifier: MIT
 
-// Amended by HashLips
-/**
-OpeaSea Metadata:
-{
-  "description": "Friendly OpenSea Creature that enjoys long swims in the ocean.", 
-  "external_url": "https://openseacreatures.io/3", 
-  "image": "https://storage.googleapis.com/opensea-prod.appspot.com/puffs/3.png", 
-  "name": "Dave Starbelly",
-  "attributes": [[
-    {
-      "trait_type": "Base", 
-      "value": "Starfish"
-    }, 
-    {
-      "trait_type": "Eyes", 
-      "value": "Big"
-    }], 
-  "background_color": Background color of the item on OpenSea. Must be a six-character hexadecimal without a pre-pended #.
-  "nimation_url": A URL to a multi-media attachment for the item. The file extensions GLTF, GLB, WEBM, MP4, M4V, OGV, and OGG are supported, along with the audio-only extensions MP3, WAV, and OGA.
-  "Animation_url": also supports HTML pages, allowing you to build rich experiences and interactive NFTs using JavaScript canvas, WebGL, and more. Scripts and relative paths within the HTML page are now supported. However, access to browser extensions is not supported.
-  "youtube_url": A URL to a YouTube video.
-}
+/*
+          _____                    _____                _____                _____          
+         /\    \                  /\    \              /\    \              |\    \         
+        /::\    \                /::\    \            /::\    \             |:\____\        
+       /::::\    \               \:::\    \           \:::\    \            |::|   |        
+      /::::::\    \               \:::\    \           \:::\    \           |::|   |        
+     /:::/\:::\    \               \:::\    \           \:::\    \          |::|   |        
+    /:::/  \:::\    \               \:::\    \           \:::\    \         |::|   |        
+   /:::/    \:::\    \              /::::\    \          /::::\    \        |::|   |        
+  /:::/    / \:::\    \    ____    /::::::\    \        /::::::\    \       |::|___|______  
+ /:::/    /   \:::\    \  /\   \  /:::/\:::\    \      /:::/\:::\    \      /::::::::\    \ 
+/:::/____/     \:::\____\/::\   \/:::/  \:::\____\    /:::/  \:::\____\    /::::::::::\____\
+\:::\    \      \::/    /\:::\  /:::/    \::/    /   /:::/    \::/    /   /:::/~~~~/~~      
+ \:::\    \      \/____/  \:::\/:::/    / \/____/   /:::/    / \/____/   /:::/    /         
+  \:::\    \               \::::::/    /           /:::/    /           /:::/    /          
+   \:::\    \               \::::/____/           /:::/    /           /:::/    /           
+    \:::\    \               \:::\    \           \::/    /            \::/    /            
+     \:::\    \               \:::\    \           \/____/              \/____/             
+      \:::\    \               \:::\    \                                                   
+       \:::\____\               \:::\____\                                                  
+        \::/    /                \::/    /                                                  
+         \/____/                  \/____/                                                   
+                                                                                            
 */
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "./ERC721A.sol";
 import "./Base64.sol";
 import "./Random.sol";
 import "./SVG.sol";
 import "./DateTime.sol";
 
-contract CivCityNFT is ERC721Enumerable, Ownable {
+contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   using Strings for uint256;
 
+  enum Step {
+      Before,
+      WhitelistSale,
+      PublicSale,
+      SoldOut,
+      Reveal
+  }
+
+  Step public sellingStep;
+
+  uint256 private constant MAX_SUPPLY = 7777;
+  uint256 private constant MAX_WHITELIST = 2777;
+  uint256 private constant MAX_PUBLIC = 4900;
+  uint256 private constant MAX_GIFT = 100;
+
+  uint256 public wlSalePrice = 0.0025 ether;
+  uint256 public publicSalePrice = 0.003 ether;
+
+  bytes32 public merkleRoot;
+
+  uint256 public saleStartTime = 1651168086;
+
+  mapping(address => uint) public amountNFTsperWalletWhitelistSale;
+
+  uint256 private teamLength;
   struct City{
     string[] names;
     int zoneDiff; // timezone diff in hours 
@@ -45,44 +74,113 @@ contract CivCityNFT is ERC721Enumerable, Ownable {
   string[] public LANG=["af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg", "ca", "ceb", "ny", "zh-cn", "zh-tw", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "tl", "fi", "fr", "fy", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "iw", "he", "hi", "hmn", "hu", "is", "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "ko", "ku", "ky", "lo", "la", "lv", "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "my", "ne", "no", "or", "ps", "fa", "pl", "pt", "pa", "ro", "ru", "sm", "gd", "sr", "st", "sn", "sd", "si", "sk", "sl", "so", "es", "su", "sw", "sv", "tg", "ta", "te", "th", "tr", "uk", "ur", "ug", "uz", "vi", "cy", "xh", "yi", "yo", "zu"];
 
   City[] public cities;
-  bool[] public revealed; // blind box
   bool[] public animation; // show GIF
   string[] public font;
   string public ipfsPrefix; // for GIF folder on IPFS
 
-  constructor() ERC721("Civilization.Cities.NFT", "CC") {
+  modifier callerIsUser() {
+      require(tx.origin == msg.sender, "The caller is another contract");
+      _;
+  }  
+  
+  constructor(address[] memory _team, uint[] memory _teamShares, bytes32 _merkleRoot) ERC721A("Civilization.Cities.NFT", "CC") 
+  PaymentSplitter(_team, _teamShares) {
     ipfsPrefix="";
+    merkleRoot = _merkleRoot;
+    teamLength = _team.length;
+  }
+
+  function whitelistMint(address _account, 
+      bytes32[] calldata _proof,
+      string[] calldata _names, 
+      int _zoneDiff, 
+      uint8[] calldata _translate) external payable callerIsUser {
+      uint price = wlSalePrice;
+      require(price != 0, "Price is 0");
+      require(currentTime() >= saleStartTime, "Whitelist Sale has not started yet");
+      //require(currentTime() < saleStartTime + 300 minutes, "Whitelist Sale is finished");
+      require(sellingStep == Step.WhitelistSale, "Whitelist sale is not activated");
+      require(isWhiteListed(msg.sender, _proof), "Not whitelisted");
+      require(amountNFTsperWalletWhitelistSale[msg.sender] == 0, "You can only get 1 NFT on the Whitelist Sale");
+      require(totalSupply() + 1 <= MAX_WHITELIST, "Max supply exceeded");
+      require(msg.value >= price, "Not enought funds");
+      amountNFTsperWalletWhitelistSale[msg.sender] += 1;
+      _safeMint(_account, _names, _zoneDiff, _translate);
+  }
+
+  function publicSaleMint(address _account,
+      string[] calldata _names, 
+      int _zoneDiff, 
+      uint8[] calldata _translate) external payable callerIsUser {
+      uint price = publicSalePrice;
+      require(price != 0, "Price is 0");
+      require(sellingStep == Step.PublicSale, "Public sale is not activated");
+      require(totalSupply() + 1 <= MAX_WHITELIST + MAX_PUBLIC, "Max supply exceeded");
+      require(msg.value >= price, "Not enought funds");
+
+      _safeMint(_account, _names, _zoneDiff, _translate);
+  }
+
+  function gift(address _account,
+      string[] calldata _names, 
+      int _zoneDiff, 
+      uint8[] calldata _translate) external onlyOwner {
+      require(sellingStep > Step.PublicSale, "Gift is after the public sale");
+      require(totalSupply() + 1 <= MAX_SUPPLY, "Reached max Supply");
+
+      _safeMint(_account, _names, _zoneDiff, _translate);
+  }
+
+  function _safeMint(address to,string[] calldata _names, int _zoneDiff, uint8[] calldata _translate) internal {
+      cities.push(City(_names, _zoneDiff, 21, _translate)); // list(googletrans.LANGUAGES)[21] = en
+
+      animation.push(false);
+      font.push('Courier');
+      _safeMint(to, 1, '');
   }
   
-  // public
-  function mint(string[] calldata _names, int _zoneDiff, uint8[] calldata _translate, bool _reveal) public onlyOwner{
-    uint256 id= totalSupply();
-    require(id< 10000, "Max 10000 NFT had minted");
+  function setSaleStartTime(uint _saleStartTime) external onlyOwner {
+      saleStartTime = _saleStartTime;
+  }
 
-    cities.push(City(_names, _zoneDiff, 21, _translate)); // list(googletrans.LANGUAGES)[21] = en
+  function currentTime() internal view returns(uint) {
+      return block.timestamp;
+  }
 
-    _safeMint(msg.sender, id);
+  function setStep(uint _step) external onlyOwner {
+      sellingStep = Step(_step);
+  }
 
-    revealed.push(_reveal);
-    animation.push(false);
-    font.push('Courier');
+  //Whitelist
+  function setMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
+      merkleRoot = _merkleRoot;
+  }
+
+  function isWhiteListed(address _account, bytes32[] calldata _proof) internal view returns(bool) {
+      return _verify(leaf(_account), _proof);
+  }
+
+  function leaf(address _account) internal pure returns(bytes32) {
+      return keccak256(abi.encodePacked(_account));
+  }
+
+  function _verify(bytes32 _leaf, bytes32[] memory _proof) internal view returns(bool) {
+      return MerkleProof.verify(_proof, merkleRoot, _leaf);
+  }
+
+  //ReleaseALL
+  function releaseAll() external {
+      for(uint i = 0 ; i < teamLength ; i++) {
+          release(payable(payee(i)));
+      }
+  }
+
+  receive() override external payable {
+      revert('Only if you mint');
   }
 
   function setIPFSPrefix(string memory _prefix) public onlyOwner{
     ipfsPrefix= _prefix;
-  }
-
-  function walletOfOwner(address _owner)
-    public
-    view
-    returns (uint256[] memory)
-  {
-    uint256 ownerTokenCount = balanceOf(_owner);
-    uint256[] memory tokenIds = new uint256[](ownerTokenCount);
-    for (uint256 i; i < ownerTokenCount; i++) {
-      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-    }
-    return tokenIds;
   }
 
   function tokenURI(uint256 tokenId)
@@ -99,7 +197,7 @@ contract CivCityNFT is ERC721Enumerable, Ownable {
 
     City storage city= cities[tokenId];
 
-    if(revealed[tokenId]){
+    if(sellingStep >= Step.Reveal){
       bytes memory animation_url='';
       if(animation[tokenId] && bytes(ipfsPrefix).length>0){
         animation_url= abi.encodePacked(', "animation_url": "', ipfsPrefix, city.names[city.translate[21]], '.gif"');
@@ -110,7 +208,7 @@ contract CivCityNFT is ERC721Enumerable, Ownable {
       if(diff<0){
         diff= -diff;
       }
-      uint _temp= uint(diff)/60;
+      uint256 _temp= uint(diff)/60;
       if(_temp<10){
         timeString= abi.encodePacked('0',_temp.toString()); 
       }else{
@@ -150,13 +248,6 @@ contract CivCityNFT is ERC721Enumerable, Ownable {
           '"},{"trait_type": "Main language","value": "',
           LANG[city.mainLang],
           '"}]}'))))));
-  }
-
-  //only owner
-  function reveal(uint256 tokenId, bool _reveal) public {
-      require(_exists(tokenId),"ERC721Metadata: URI query for nonexistent token");
-      require(ownerOf(tokenId)== msg.sender, "You are not onwer of this NFT");
-      revealed[tokenId] = _reveal;
   }
 
   function showAnimation(uint256 tokenId, bool _show) public {
@@ -202,7 +293,7 @@ contract CivCityNFT is ERC721Enumerable, Ownable {
   function _buildImage(uint256 tokenId) view internal returns (string memory){
     City storage city= cities[tokenId];
     
-    if(revealed[tokenId] == false) {
+    if(sellingStep < Step.Reveal) {
       bytes[5] memory parts;
               // SVG Template, with rect backgroud
       parts[0]= SVG.head(font[tokenId],'700');
@@ -236,16 +327,11 @@ contract CivCityNFT is ERC721Enumerable, Ownable {
          
 
     string storage name= city.names[city.translate[city.mainLang]];
-    /*
-    uint256 size= 500/bytes(name).length;
-    uint256 x_pos= Random.randrange(500-size*bytes(name).length, 127);
-    uint256 y_pos= Random.randrange(size+30, 470, 128);
-    */
 
     // Rest translation text
     parts[2]="";
     uint256 totalNames= city.names.length;
-    for(uint i=0; i<totalNames; i++){
+    for(uint256 i=0; i<totalNames; i++){
         uint256 size;
         uint256 x_pos;
         uint256 y_pos;
