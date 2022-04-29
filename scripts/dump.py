@@ -4,7 +4,7 @@ import json
 import os,sys
 import random
 from gen_gif import gen_dir
-import city_zone
+import scripts.city_zone as city_zone
 
 D18= 10**18
 ZERO= '0x0000000000000000000000000000000000000000'
