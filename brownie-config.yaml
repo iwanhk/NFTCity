@@ -62,3 +62,4 @@ wallets:
     admin: ${ADMIN_PRIVATE_KEY}
     creator: ${CREATOR_PRIVATE_KEY}
     consumer: ${CONSUMER_PRIVATE_KEY}
+    iwan: ${IWANCAO_PRIVATE_KEY}

@@ -31,29 +31,70 @@ def process_city(meta_file:str):
     #print(f"{names_list=} \n{lan_list=}")
     return (names_list, lan_list)
 
-def mint_whitelist(city, cityDict, nft, user):
+def _get_meta(city, cityDict) -> tuple:
     with open(DATADIR+ 'deployed.json', 'r') as deployed_file:
         history= json.load(deployed_file)
     if city in history:
         print(f"{city} in history, pass")
-        return
+        return (None, None, None)
+
     file_name=os.path.join(DATADIR+ "city_meta", city+'.ot.json')
     names_list, lan_list= process_city(file_name)
     city_name, zone, now_time= city_zone.query(city, cityDict)
     if now_time==None:
         print(f"{city} cannot be found in cityZone, pass")
-        return
+        return (None, None, None)
     #print(f"{now_time=}")
 
     zoneDiff=int(now_time[-4:-2])*60+ int(now_time[-2:])
     if now_time[-5]=='-':
         zoneDiff= -zoneDiff
-    print(f"Minting NFT {city} ...")
-    nft.whitelistMint(user, proof[user], names_list, zoneDiff, lan_list, addr2(user, "0.0025 ether"))
+
+    return (names_list, zoneDiff, lan_list)
+
+def _after_mint_record(city, nft):
+    with open(DATADIR+ 'deployed.json', 'r') as deployed_file:
+        history= json.load(deployed_file)
+
     history[city]= nft.totalSupply()
     with open(DATADIR+ 'deployed.json', 'w') as deployed_file:
         json.dump(history, deployed_file)
-        
+
+def whitelist_mint(city, cityDict, nft, user):
+    names_list, zoneDiff, lan_list= _get_meta(city, cityDict)
+    if names_list==None:
+        return
+
+    print(f"Minting NFT {city} ...")
+    nft.whitelistMint(user, proof[user], names_list, zoneDiff, lan_list, addr2(user, "0.0025 ether"))
+    _after_mint_record(city, nft)
+
+def whitelist_mint_test(city, cityDict, nft, user1, user2):
+    names_list, zoneDiff, lan_list= _get_meta(city, cityDict)
+    if names_list==None:
+        return
+
+    print(f"Minting NFT {city} ...")
+    nft.whitelistMint(user1, proof[user2], names_list, zoneDiff, lan_list, addr2(user1, "0.0025 ether"))
+    _after_mint_record(city, nft)
+
+def public_mint(city, cityDict, nft, user):
+    names_list, zoneDiff, lan_list= _get_meta(city, cityDict)
+    if names_list==None:
+        return
+
+    print(f"Minting NFT {city} ...")
+    nft.publicSaleMint(user, names_list, zoneDiff, lan_list, addr2(user, "0.003 ether"))
+    _after_mint_record(city, nft)
+
+def gift(city, cityDict, nft, _to, _from):
+    names_list, zoneDiff, lan_list= _get_meta(city, cityDict)
+    if names_list==None:
+        return
+
+    print(f"Minting NFT {city} ...")
+    nft.gift(_to, names_list, zoneDiff, lan_list, addr(_from))
+    _after_mint_record(city, nft)
 
 def main():
     active_network= network.show_active()
@@ -75,14 +116,17 @@ def main():
             accounts.add(config['wallets']['admin'])
             accounts.add(config['wallets']['creator'])
             accounts.add(config['wallets']['consumer'])
+            accounts.add(config['wallets']['iwan'])
 
             admin= accounts[0]
             creator= accounts[1]
             consumer= accounts[2]
+            iwan= accounts[3]
 
             balance_alert(admin, "admin")
             balance_alert(creator, "creator")
             balance_alert(consumer, "consumer")
+            balance_alert(consumer, "iwan")
 
             if len(Random)==0:
                 Random.deploy(addr(admin))
@@ -96,19 +140,27 @@ def main():
             #for city in cities:
             #   mint(city, cityDict, nft, True, admin)
 
-            nft.setStep(1, addr(admin))
-            mint_whitelist(cities[0], cityDict, nft, creator)
+            #nft.setStep(1, addr(admin)) # 1= WhitelistSale
+            #whitelist_mint(cities[3], cityDict, nft, consumer)
+            #whitelist_mint_test(cities[3], cityDict, nft, iwan, creator)
         
+            #nft.setStep(2, addr(admin)) # 2= PublicSale
+            #public_mint(cities[1], cityDict, nft, iwan)
+
+            nft.setStep(3, addr(admin)) # SoldOut
+            gift(cities[4], cityDict, nft, iwan, admin)
             #nft.setIPFSPrefix(ipfs, addr(admin))
             
         if active_network == 'bsc-main':
             accounts.add(config['wallets']['admin'])
             accounts.add(config['wallets']['creator'])
             accounts.add(config['wallets']['consumer'])
+            accounts.add(config['wallets']['iwan'])
 
             admin= accounts[0]
             creator= accounts[1]
             consumer= accounts[2]
+            iwan= accounts[3]
 
     except Exception:
         console.print_exception()

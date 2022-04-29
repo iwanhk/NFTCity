@@ -60,8 +60,6 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
 
   bytes32 public merkleRoot;
 
-  uint256 public saleStartTime = 1651168086;
-
   mapping(address => uint) public amountNFTsperWalletWhitelistSale;
 
   uint256 private teamLength;
@@ -97,8 +95,6 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
       uint8[] calldata _translate) external payable callerIsUser {
       uint price = wlSalePrice;
       require(price != 0, "Price is 0");
-      require(currentTime() >= saleStartTime, "Whitelist Sale has not started yet");
-      //require(currentTime() < saleStartTime + 300 minutes, "Whitelist Sale is finished");
       require(sellingStep == Step.WhitelistSale, "Whitelist sale is not activated");
       require(isWhiteListed(msg.sender, _proof), "Not whitelisted");
       require(amountNFTsperWalletWhitelistSale[msg.sender] == 0, "You can only get 1 NFT on the Whitelist Sale");
@@ -138,10 +134,6 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
       font.push('Courier');
       _safeMint(to, 1, '');
   }
-  
-  function setSaleStartTime(uint _saleStartTime) external onlyOwner {
-      saleStartTime = _saleStartTime;
-  }
 
   function currentTime() internal view returns(uint) {
       return block.timestamp;
@@ -169,7 +161,7 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   }
 
   //ReleaseALL
-  function releaseAll() external {
+  function releaseAll() external onlyOwner{
       for(uint i = 0 ; i < teamLength ; i++) {
           release(payable(payee(i)));
       }
