@@ -9,6 +9,7 @@ D18= 10**18
 ZERO= '0x0000000000000000000000000000000000000000'
 active_network= network.show_active()
 LANG=["af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg", "ca", "ceb", "ny", "zh-cn", "zh-tw", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "tl", "fi", "fr", "fy", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "iw", "he", "hi", "hmn", "hu", "is", "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "ko", "ku", "ky", "lo", "la", "lv", "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "my", "ne", "no", "or", "ps", "fa", "pl", "pt", "pa", "ro", "ru", "sm", "gd", "sr", "st", "sn", "sd", "si", "sk", "sl", "so", "es", "su", "sw", "sv", "tg", "ta", "te", "th", "tr", "uk", "ur", "ug", "uz", "vi", "cy", "xh", "yi", "yo", "zu"];
+ROOT='0x4a8d100c5b3c09841808d8fe60f6e7ce0812e6154420676e08030af0ad9b43fc'
 
 def process_city(meta_file:str):
     with open(meta_file,'r') as load_f:
@@ -39,8 +40,11 @@ def main():
             Random.deploy(addr(admin))
             SVG.deploy(addr(admin))
             DateTime.deploy(addr(admin))
-            nft= CivCityNFT.deploy(addr(admin))
-            test= testArgList.deploy(addr(admin))
+            team= [admin, creator]
+            share= [50, 50]
+            CivCityNFT.deploy(team, share, ROOT, addr(admin))
+
+            nft= CivCityNFT[-1]
 
         if active_network== 'mainnet-fork':
             admin=accounts[0]
