@@ -1,4 +1,4 @@
-from brownie import CivCityNFT, CityToken, Random, DateTime, SVG, accounts, network, config
+from brownie import CivCityNFT, Random, DateTime, SVG, accounts, network, config
 from scripts.tools import *
 import json
 import os,sys
@@ -15,23 +15,19 @@ def main():
     print("Current Network:"+ active_network)
     
     try:
-        if active_network== 'development':
+        if active_network== 'development' or active_network== 'mainnet-fork':
             admin= accounts[0]
             creator= accounts[1]
             consumer= accounts[2]
 
-            if len(Random)==0:
-                Random.deploy(addr(admin))
-            if len(SVG)==0:
-                SVG.deploy(addr(admin))
-            if len(DateTime)==0:
-                DateTime.deploy(addr(admin))
-            if len(CityToken)==0:
-                CityToken.deploy(addr(admin))
+            Random.deploy(addr(admin))
+            SVG.deploy(addr(admin))
+            DateTime.deploy(addr(admin))
+            #CityToken.deploy(addr(admin))
 
             team= [admin, creator]
             share= [50, 50]
-            CivCityNFT.deploy(CityToken[-1], team, share, ROOT, addr(admin))
+            CivCityNFT.deploy(team, share, ROOT, addr(admin))
 
         if active_network== 'bsc-test' or active_network== 'rinkeby' :
             accounts.add(config['wallets']['admin'])
@@ -46,14 +42,14 @@ def main():
             balance_alert(creator, "creator")
             balance_alert(consumer, "consumer")
 
-            admin.deploy(Random, publish_source=True)
-            admin.deploy(SVG, publish_source=True)
-            admin.deploy(DateTime, publish_source=True)
-            admin.deploy(CityToken, publish_source=True)
+            Random.deploy(addr(admin))
+            SVG.deploy(addr(admin))
+            DateTime.deploy(addr(admin))
+            #CityToken.deploy(addr(admin))
 
             team= [admin, creator]
             share= [50, 50]
-            admin.deploy(CivCityNFT, CityToken[-1], team, share, ROOT, publish_source=True)
+            CivCityNFT.deploy(team, share, ROOT, addr(admin))
             
         if active_network == 'bsc-main' or active_network== 'mainnet' :
             accounts.add(config['wallets']['admin'])
