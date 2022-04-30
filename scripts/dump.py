@@ -75,7 +75,7 @@ def main():
     print("Current Network:"+ active_network)
     
     try:
-        if active_network == 'development' :
+        if active_network == 'development' or active_network== 'mainnet-fork':
             admin=accounts[0]
             creator=accounts[1]
             consumer=accounts[2]
@@ -103,13 +103,13 @@ def main():
             nft.setStep(3) # Final stage
             nft.setPrices(0,0)
 
-            """
+            
             for city in cities:
                 if os.path.exists(DATADIR+ 'svg/'+ city):
                     continue
                 mint(city, cityDict, nft, admin)
-            """
-            mint(cities[0], cityDict, nft, admin)
+            
+            #mint(cities[0], cityDict, nft, admin)
 
             for i in range(nft.totalSupply()):
                 name= nft.getNames(i)[nft.getLangs(i)[21]]
@@ -117,23 +117,6 @@ def main():
                 dump_svg(nft, i, admin)
             #gen_dir(('svg', 'gif'))
             
-            #with ThreadPoolExecutor() as p:
-            #    p.map(gen_group, cities)
-            #nft.reveal(addr(admin))
-
-        if active_network== 'mainnet-fork':
-            admin=accounts[0]
-            creator=accounts[1]
-            consumer=accounts[2]
-
-            balance_alert(admin, "admin")
-            balance_alert(creator, "creator")
-            balance_alert(consumer, "consumer")
-
-            nft= CivCityNFT[-1]
-            for i in range(nft.totalSupply()):
-                dump_svg(nft, i, admin)
-
 
         if active_network== 'bsc-test' or active_network== 'rinkeby' :
             accounts.add(config['wallets']['admin'])
