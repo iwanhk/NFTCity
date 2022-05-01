@@ -30,9 +30,16 @@ def main():
             #nft.setStep(2, addr(admin)) # 2= PublicSale
             #public_mint(cities[1], cityDict, nft, iwan)
 
+            nft.setPrices(0,0, addr(admin))
             nft.setStep(1, addr(admin)) # SoldOut
             gift(cities[4], cityDict, nft, iwan, admin)
-            #nft.setIPFSPrefix(ipfs, addr(admin))
+            whitelist_mint(cities[5], cityDict, nft, consumer, 0)
+
+            nft.setStep(2, addr(admin)) # 2= PublicSale
+            public_mint(cities[6], cityDict, nft, iwan, 0)
+
+            nft.setIPFSPrefix(ipfs, addr(admin))
+            nft.setStep(3, addr(admin))
             
         if active_network in TEST_NETWORKS or active_network in REAL_NETWORKS:
             if active_network in DEPLOYED_ADDR:
