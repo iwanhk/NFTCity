@@ -44,10 +44,8 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
 
   Step public sellingStep;
 
-  uint256 private constant MAX_SUPPLY = 7777;
-  uint256 private constant MAX_WHITELIST = 2777;
-  uint256 private constant MAX_PUBLIC = 4900;
-  uint256 private constant MAX_GIFT = 100;
+  uint256 private constant MAX_SUPPLY = 10000;
+  uint256 private constant MAX_WHITELIST_AND_GIFT = 3000;
 
   uint256 public wlSalePrice = 0.0025 ether;
   uint256 public publicSalePrice = 0.003 ether;
@@ -73,6 +71,26 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
       require(ownerOf(tokenId)== msg.sender, "Only Owner");
       _;
   }
+
+  modifier reachTotalSupply() {
+      require(totalSupply() < MAX_SUPPLY, "Max supply exceeded");
+      _;
+  }
+
+  modifier reachToalSpecial() {
+      require(totalSupply() < MAX_WHITELIST_AND_GIFT, "Max specail supply exceeded");
+      _;
+  }
+
+  modifier stepOne() {
+      require(sellingStep == Step.WhitelistSale, "Not in Whitelist stage");
+      _;
+  }
+
+  modifier stepTwo() {
+      require(sellingStep >= Step.PublicSale, "Not in public stage");
+      _;
+  }
   constructor(address _city, address[] memory _team, uint[] memory _teamShares, bytes32 _merkleRoot) ERC721A("Civilization.Cities.NFT", "CC") 
   PaymentSplitter(_team, _teamShares) {
 
@@ -85,26 +103,12 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
       bytes32[] calldata _proof,
       string[] calldata _names, 
       int _zoneDiff, 
-      uint8[] calldata _translate) external payable callerIsUser {
+      uint8[] calldata _translate) external payable callerIsUser stepOne reachToalSpecial {
 
-      require(sellingStep == Step.WhitelistSale, "Whitelist sale is not activated");
       require(isWhiteListed(msg.sender, _proof), "Not whitelisted");
       require(amountNFTsperWalletWhitelistSale[msg.sender] == 0, "You can only get 1 NFT on the Whitelist Sale");
-      require(totalSupply() < MAX_WHITELIST, "Max supply exceeded");
       require(msg.value >= wlSalePrice, "Not enought funds");
       amountNFTsperWalletWhitelistSale[msg.sender] += 1;
-
-      _safeMint(_account, _names, _zoneDiff, _translate);
-  }
-
-  function publicSaleMint(address _account,
-      string[] calldata _names, 
-      int _zoneDiff, 
-      uint8[] calldata _translate) external payable callerIsUser {
-
-      require(sellingStep == Step.PublicSale, "Public sale is not activated");
-      require(totalSupply() < MAX_WHITELIST + MAX_PUBLIC, "Max supply exceeded");
-      require(msg.value >= publicSalePrice, "Not enought funds");
 
       _safeMint(_account, _names, _zoneDiff, _translate);
   }
@@ -112,13 +116,17 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   function gift(address _account,
       string[] calldata _names, 
       int _zoneDiff, 
-      uint8[] calldata _translate) external onlyOwner {
-      require(sellingStep > Step.PublicSale, "Gift is after the public sale");
-      require(totalSupply() < MAX_SUPPLY, "Reached max Supply");
+      uint8[] calldata _translate) external onlyOwner stepOne reachToalSpecial {
+      _safeMint(_account, _names, _zoneDiff, _translate);
+  }
+  function publicSaleMint(address _account,
+      string[] calldata _names, 
+      int _zoneDiff, 
+      uint8[] calldata _translate) external payable callerIsUser stepTwo reachTotalSupply {
+      require(msg.value >= publicSalePrice, "Not enought funds");
 
       _safeMint(_account, _names, _zoneDiff, _translate);
   }
-
   function _safeMint(address to,string[] calldata _names, int _zoneDiff, uint8[] calldata _translate) internal {
       city.mint(_names, _zoneDiff, _translate);
       _safeMint(to, 1, '');
@@ -139,6 +147,11 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
 
   function setIPFSPrefix(string memory _prefix) external onlyOwner{
       city.setIPFSPrefix(_prefix);
+  }
+
+  function setPrices(uint256 _wlSalePrice, uint256 _publicSalePrice) public onlyOwner{
+    wlSalePrice= _wlSalePrice;
+    publicSalePrice= _publicSalePrice;
   }
 
   function isWhiteListed(address _account, bytes32[] calldata _proof) internal view returns(bool) {
@@ -185,9 +198,5 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   function setMainLang(uint256 tokenId, string calldata _lang) external 
     tokenExist(tokenId) ownerOfToken(tokenId){
     city.setMainLang(tokenId, _lang);
-  }
-
-  function getMainLang(uint256 tokenId) view external tokenExist(tokenId) returns(string memory){
-    return city.getMainLang(tokenId);
   }
 }

@@ -35,6 +35,5 @@ interface ICityToken{
     function setFont(uint256 tokenId, string calldata _font) external;
     function getFont(uint256 tokenID) view external returns (string memory);
     function setMainLang(uint256 tokenId, string calldata lang) external;
-    function getMainLang(uint256 tokenId) view  external returns(string memory);
     function svgString(uint256 tokenId, uint256 nowHour, uint256 nowMin) view external returns (string memory);
 }

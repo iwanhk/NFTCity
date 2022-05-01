@@ -3,8 +3,7 @@
 
 import sys
 import city_zone 
-    
-    
+
 if __name__=='__main__':
     dic= city_zone.initDataBase()
     city_name, zone, now_time= city_zone.query(sys.argv[1], dic)

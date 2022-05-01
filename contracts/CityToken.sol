@@ -144,11 +144,18 @@ contract CityToken is Ownable {
         revert("No this lang in the lang list");
     }
 
-    function getMainLang(uint256 tokenId) view external onlyOwner returns(string memory) {
+    function getMainLang(uint256 tokenId) view external returns(string memory) {
         return LANG[cities[tokenId].mainLang];
     }
+    function getNames(uint256 tokenId) view  external returns (string [] memory){
+        return cities[tokenId].names;
+    }
 
-    function svgString(uint256 tokenId, uint256 nowHour, uint256 nowMin) view public onlyOwner returns (string memory){
+    function getLangs(uint256 tokenId) view external returns (uint8 [] memory){
+        return cities[tokenId].translate;
+    }
+
+    function svgString(uint256 tokenId, uint256 nowHour, uint256 nowMin) view public returns (string memory){
         bytes[6] memory parts;
         City storage city= cities[tokenId];
 

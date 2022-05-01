@@ -39,7 +39,6 @@ def trans(city:str) ->None:
         f.write(out_json) 
 
 if __name__== "__main__":
-
     with open(DATADIR+ 'cities.txt', 'r') as f:
         line= f.readline()
         while(line):

@@ -1,81 +1,27 @@
-from brownie import CivCityNFT, CityToken, Random, DateTime, SVG, accounts, network, config
-from scripts.tools import *
-import json
-import os,sys
-import random
-
-D18= 10**18
-ZERO= '0x0000000000000000000000000000000000000000'
-active_network= network.show_active()
-LANG=["af", "sq", "am", "ar", "hy", "az", "eu", "be", "bn", "bs", "bg", "ca", "ceb", "ny", "zh-cn", "zh-tw", "co", "hr", "cs", "da", "nl", "en", "eo", "et", "tl", "fi", "fr", "fy", "gl", "ka", "de", "el", "gu", "ht", "ha", "haw", "iw", "he", "hi", "hmn", "hu", "is", "ig", "id", "ga", "it", "ja", "jw", "kn", "kk", "km", "ko", "ku", "ky", "lo", "la", "lv", "lt", "lb", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mn", "my", "ne", "no", "or", "ps", "fa", "pl", "pt", "pa", "ro", "ru", "sm", "gd", "sr", "st", "sn", "sd", "si", "sk", "sl", "so", "es", "su", "sw", "sv", "tg", "ta", "te", "th", "tr", "uk", "ur", "ug", "uz", "vi", "cy", "xh", "yi", "yo", "zu"];
-ROOT='0x4a8d100c5b3c09841808d8fe60f6e7ce0812e6154420676e08030af0ad9b43fc'
+from scripts.city_functions import *
 
 def main():
     active_network= network.show_active()
     print("Current Network:"+ active_network)
-    
+
+    (cities, cityDict)= init_city_data()
+    admin, creator, consumer, iwan= get_accounts(active_network)
+
     try:
-        if active_network== 'development':
-            admin= accounts[0]
-            creator= accounts[1]
-            consumer= accounts[2]
-
-            if len(Random)==0:
+        if active_network in TEST_NETWORKS:
+            if len(Random):
                 Random.deploy(addr(admin))
-            if len(SVG)==0:
+            if len(SVG):    
                 SVG.deploy(addr(admin))
-            if len(DateTime)==0:
+            if len(DateTime): 
                 DateTime.deploy(addr(admin))
-            if len(CityToken)==0:
-                CityToken.deploy(addr(admin))
+            if len(CityToken): 
+                city= CityToken.deploy(addr(admin))
 
             team= [admin, creator]
             share= [50, 50]
-            CivCityNFT.deploy(CityToken[-1], team, share, ROOT, addr(admin))
-
-        if active_network== 'bsc-test' or active_network== 'rinkeby' :
-            accounts.add(config['wallets']['admin'])
-            accounts.add(config['wallets']['creator'])
-            accounts.add(config['wallets']['consumer'])
-
-            admin= accounts[0]
-            creator= accounts[1]
-            consumer= accounts[2]
-
-            balance_alert(admin, "admin")
-            balance_alert(creator, "creator")
-            balance_alert(consumer, "consumer")
-
-            admin.deploy(Random, publish_source=True)
-            admin.deploy(SVG, publish_source=True)
-            admin.deploy(DateTime, publish_source=True)
-            admin.deploy(CityToken, publish_source=True)
-
-            team= [admin, creator]
-            share= [50, 50]
-            admin.deploy(CivCityNFT, CityToken[-1], team, share, ROOT, publish_source=True)
-            
-        if active_network == 'bsc-main' or active_network== 'mainnet' :
-            accounts.add(config['wallets']['admin'])
-            accounts.add(config['wallets']['creator'])
-            accounts.add(config['wallets']['consumer'])
-
-            admin= accounts[0]
-            creator= accounts[1]
-            consumer= accounts[2]
-
-            if len(Random)==0:
-                Random.deploy(addr(admin))
-            if len(SVG)==0:
-                SVG.deploy(addr(admin))
-            if len(DateTime)==0:
-                DateTime.deploy(addr(admin))
-            if len(CityToken==0):
-                CityToken.deploy(admin)
-
-            team= [admin, creator]
-            share= [50, 50]
-            admin.deploy(CivCityNFT, CityToken[-1], team, share, ROOT, publish_source=True)
+            nft= CivCityNFT.deploy(CityToken[-1], team, share, ROOT, addr(admin))
+            city.transferOwnership(nft, addr(admin))            
 
     except Exception:
         console.print_exception()
