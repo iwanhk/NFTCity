@@ -66,7 +66,7 @@ contract CityToken is Ownable {
     }
 
     function tokenURI(uint256 tokenId, bool revealed) public view onlyOwner returns (string memory) {
-        City storage city= cities[tokenId];
+        City memory city= cities[tokenId];
 
         if(revealed){
             bytes memory animation_url='';
@@ -134,14 +134,15 @@ contract CityToken is Ownable {
         return font[tokenId];
     }
     function setMainLang(uint256 tokenId, string calldata lang) external onlyOwner {
-        for(uint8 i=0; i< LANG.length; i++){
+        uint8 length= uint8(LANG.length);
+        
+        for(uint8 i=0; i< length; i++){
             if(_stringEqu(bytes(LANG[i]), bytes(lang))){
                 cities[tokenId].mainLang= i;
                 return;
             }
         }
-
-        revert("No this lang in the lang list");
+        revert("No lang in the lang list");
     }
 
     function getMainLang(uint256 tokenId) view external returns(string memory) {
@@ -157,19 +158,15 @@ contract CityToken is Ownable {
 
     function svgString(uint256 tokenId, uint256 nowHour, uint256 nowMin) view public returns (string memory){
         bytes[6] memory parts;
-        City storage city= cities[tokenId];
+        City memory city= cities[tokenId];
 
-        uint256 degree= nowHour*100/12;
-        if(nowHour> 12){
-        degree= 200- degree;
-        }
+        uint256 degree= nowHour> 12? 200- nowHour*100/12: nowHour*100/12;
 
         // SVG Template, with rect backgroud
         parts[0]= SVG.head(font[tokenId],'700');
         parts[1]= SVG.rect(string(abi.encodePacked('0 0% ', degree.toString(), '%')));
             
-
-        string storage name= city.names[city.translate[city.mainLang]];
+        string memory name= city.names[city.translate[city.mainLang]];
 
         // Rest translation text
         parts[2]="";
@@ -180,7 +177,7 @@ contract CityToken is Ownable {
             uint256 y_pos;
 
             if(i==city.translate[city.mainLang]){
-            continue;
+                continue;
             }
             size= Random.randrange(uint256(250/totalNames), uint256(1250/totalNames), i<<2);
             x_pos= (i % (totalNames/10))  * 5000/totalNames + Random.randrange(30, i<<2+1);
@@ -202,15 +199,15 @@ contract CityToken is Ownable {
         // Timestamp
         string memory hourString;
         if(nowHour<10){
-        hourString=string(abi.encodePacked("0", nowHour.toString())); 
+            hourString=string(abi.encodePacked("0", nowHour.toString())); 
         }else{
-        hourString=string(abi.encodePacked(nowHour.toString())); 
+            hourString=string(abi.encodePacked(nowHour.toString())); 
         }
         string memory minString;
         if(nowMin<10){
-        minString=string(abi.encodePacked("0", nowMin.toString())); 
+            minString=string(abi.encodePacked("0", nowMin.toString())); 
         }else{
-        minString=string(abi.encodePacked(nowMin.toString())); 
+            minString=string(abi.encodePacked(nowMin.toString())); 
         }
 
         parts[4]= SVG.text(string(abi.encodePacked("180 100% ", (100-degree).toString(), "%")), 
@@ -223,7 +220,7 @@ contract CityToken is Ownable {
 
 ///////////////////////// Internal Functions /////////////////////////////////////////////
     function _buildImage(uint256 tokenId, bool revealed) view internal returns (string memory) {
-        City storage city= cities[tokenId];
+        City memory city= cities[tokenId];
         
         if(!revealed) {
             bytes[5] memory parts;
@@ -239,7 +236,7 @@ contract CityToken is Ownable {
         int diff= int(DateTime.getHour()*60+ DateTime.getMinute())+ city.zoneDiff;
 
         if(diff<0){
-        diff+= 1440; //24 hours = 1440 mins
+            diff+= 1440; //24 hours = 1440 mins
         }
 
         return svgString(tokenId, uint256(diff)/60, uint256(diff)%60);
