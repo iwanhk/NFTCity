@@ -35,12 +35,12 @@ def mint(city, cityDict, nft, user):
     if now_time==None:
         print(f"{city} cannot be found in cityZone, pass")
         return
-    print(f"{now_time=}")
+    #print(f"{now_time=}")
 
     zoneDiff=int(now_time[-4:-2])*60+ int(now_time[-2:])
     if now_time[-5]=='-':
         zoneDiff= -zoneDiff
-    #nft.mint(names_list, zoneDiff, lan_list, reveal, addr(user))
+    print(f"Minting NFT {city} ...")
     nft.publicSaleMint(user, names_list, zoneDiff, lan_list, addr2(user, 0))
 
 def dump_svg(nft, index, user):
@@ -103,7 +103,6 @@ def main():
             nft.setStep(3) # Final stage
             nft.setPrices(0,0)
 
-            
             for city in cities:
                 if os.path.exists(DATADIR+ 'svg/'+ city):
                     continue
@@ -115,7 +114,8 @@ def main():
                 name= nft.getNames(i)[nft.getLangs(i)[21]]
                 print(f"Now dumping {name}...")
                 dump_svg(nft, i, admin)
-            #gen_dir(('svg', 'gif'))
+
+            #gen_dir((DATADIR+ 'svg', DATADIR+ 'gif'))
             
 
         if active_network== 'bsc-test' or active_network== 'rinkeby' :

@@ -111,6 +111,7 @@ def main():
                 #print(os.path.join(path, file_name) )
                 cities.append(file_name[:-8])
     print(f"Total {len(cities)} city NFT to be minted")
+
     try:
         if active_network== 'bsc-test' or active_network== 'rinkeby' :
             accounts.add(config['wallets']['admin'])
@@ -128,12 +129,6 @@ def main():
             balance_alert(consumer, "consumer")
             balance_alert(consumer, "iwan")
 
-            if len(Random)==0:
-                Random.deploy(addr(admin))
-            if len(SVG)==0:
-                SVG.deploy(addr(admin))
-            if len(DateTime)==0:
-                DateTime.deploy(addr(admin))
             nft= CivCityNFT[-1]
 
             # Test for whitelist mint

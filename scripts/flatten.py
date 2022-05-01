@@ -1,4 +1,4 @@
-from brownie import CivCityNFT, CityToken, Random, DateTime, SVG, accounts, network, config
+from brownie import CivCityNFT, Random, DateTime, SVG, accounts, network, config
 import json
 from scripts.tools import *
 import os, sys
@@ -37,13 +37,11 @@ def main():
         Random.deploy(addr(admin))
         SVG.deploy(addr(admin))
         DateTime.deploy(addr(admin))
-        CityToken.deploy(addr(admin))
 
         team= [admin, creator]
         share= [50, 50]
-        CivCityNFT.deploy(CityToken[-1], team, share, ROOT, addr(admin))
+        CivCityNFT.deploy(team, share, ROOT, addr(admin))
 
-        flat_contract('CityToken', CityToken.get_verification_info())
         flat_contract('CivCityNFT', CivCityNFT.get_verification_info())
 
     except Exception:
