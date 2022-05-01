@@ -135,7 +135,7 @@ def dump_svg(city, nft, index, user):
             f.write(svg)
 
 def _get_meta(city, cityDict) -> tuple:
-    if active_network == 'development' or active_network== 'mainnet_fork':
+    if active_network in LOCAL_NETWORKS:
         pass
     else:
         with open(DATADIR+ 'deployed.json', 'r') as deployed_file:
@@ -159,7 +159,7 @@ def _get_meta(city, cityDict) -> tuple:
     return (names_list, zoneDiff, lan_list)
 
 def _after_mint_record(city, nft):
-    if active_network == 'development' or active_network== 'mainnet_fork':
+    if active_network in LOCAL_NETWORKS:
         return
     with open(DATADIR+ 'deployed.json', 'r') as deployed_file:
         history= json.load(deployed_file)
