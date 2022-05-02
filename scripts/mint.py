@@ -32,11 +32,11 @@ def main():
 
             nft.setPrices(0,0, addr(admin))
             nft.setStep(1, addr(admin)) # SoldOut
-            gift(cities[4], cityDict, nft, iwan, admin)
-            whitelist_mint(cities[5], cityDict, nft, consumer, 0)
+            gift(cities[0], cityDict, nft, iwan, admin)
+            whitelist_mint(cities[1], cityDict, nft, consumer, 0)
 
             nft.setStep(2, addr(admin)) # 2= PublicSale
-            public_mint(cities[6], cityDict, nft, iwan, 0)
+            public_mint(cities[2], cityDict, nft, iwan, 0)
 
             nft.setIPFSPrefix(ipfs, addr(admin))
             nft.setStep(3, addr(admin))
@@ -48,11 +48,13 @@ def main():
 
                 nft.setPrices(0,0, addr(admin))
                 nft.setStep(3, addr(admin)) # public sale
+                #public_mint(cities[3], cityDict, nft, iwan, 0)
+                
                 for city in cities:
                     if os.path.exists(DATADIR+ 'svg/'+ city):
                         continue
                     mint(city, cityDict, nft, admin, "0")                
-
+                
     except Exception:
         console.print_exception()
         # Test net contract address

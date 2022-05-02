@@ -22,7 +22,7 @@ TEST_NETWORKS=['rinkeby', 'bsc-test', 'mumbai']
 REAL_NETWORKS=['mainnet', 'polygon']
 DEPLOYED_ADDR={ # Deployed address of CivCityNFT CityToken
     'rinkeby': ["0x22c1b71bf659a36fad8a476c3499964d2714c13b", "0x8525e4bf39ce1f5e9a3c4cd4fc29c39828edd8e9"],
-    'mumbai': ["0x11c33fBF5a6D4e94460b459aa952e43F165c600E", "0xe71922Ef8a9585936f9e3915253052eB98A9Ea8C"]
+    'mumbai': ["0x5C6673a03fA8C4D2015C13725F7D69AdB5343878", "0xb813D03eEe3eF9148Cfa7d51a634857723932bAd"]
 }
 
 def get_accounts(active_network):
@@ -79,7 +79,7 @@ def init_city_data():
             if(file_name[-7:]=='ot.json'):
                 #print(os.path.join(path, file_name) )
                 cities.append(file_name[:-8])
-    print(f"Total {len(cities)} city NFT to be minted")
+    print(f"Total {len(cities)} city meta data stored in cities")
     return (cities, cityDict)
 
 def process_city(meta_file:str):

@@ -22,14 +22,12 @@ def main():
         if active_network in TEST_NETWORKS:
             if len(Random)==0:
                 Random.deploy(addr(admin))
-            if len(SVG)==0:    
-                SVG.deploy(addr(admin))
+            #if len(SVG)==0:    
+            SVG.deploy(addr(admin))
             if len(DateTime)==0: 
                 DateTime.deploy(addr(admin))
-            if len(CityToken)==0: 
-                city= CityToken.deploy(addr(admin))
-            else:
-                city= CityToken[-1]
+            #if len(CityToken)==0: 
+            city= CityToken.deploy(addr(admin))
 
             team= [admin, creator]
             share= [50, 50]
