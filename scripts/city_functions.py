@@ -26,11 +26,17 @@ DEPLOYED_ADDR={ # Deployed address of CivCityNFT CityToken
 }
 
 def get_accounts(active_network):
-    if active_network == 'development':
-        admin= accounts[0]
-        creator= accounts[1]
-        consumer= accounts[2]
-        iwan= accounts[3]
+    if active_network in LOCAL_NETWORKS:
+        admin= accounts.add(config['wallets']['admin'])
+        creator= accounts.add(config['wallets']['creator'])
+        consumer= accounts.add(config['wallets']['consumer'])
+        iwan= accounts.add(config['wallets']['iwan'])
+
+        accounts[0].transfer(admin, "100 ether")
+        accounts[1].transfer(creator, "100 ether")
+        accounts[2].transfer(consumer, "100 ether")
+        accounts[3].transfer(iwan, "100 ether")
+        
     else:
         admin= accounts.add(config['wallets']['admin'])
         creator= accounts.add(config['wallets']['creator'])
