@@ -187,14 +187,13 @@ contract CityToken is Ownable {
             parts[2]= abi.encodePacked(parts[2], SVG.text(
                         string(abi.encodePacked(Random.randrange(360, i<<2+3).toString(), " 100% ", (100-degree).toString(), "%")), 
                         size.toString(),
-                        string(abi.encodePacked('x= "', x_pos.toString(), '" y="', y_pos.toString(), '"')),
+                        x_pos, y_pos,
                         city.names[i]));
         }
 
         // Main Lang text
         parts[3]= SVG.textMiddle(string(abi.encodePacked(Random.randrange(360, 129).toString(), " 100% ", (100-degree).toString(), "%")), 
                     "70",
-                    string(abi.encodePacked('x= "250" y="250"')),
                     name);
         // Timestamp
         string memory hourString;
@@ -212,7 +211,7 @@ contract CityToken is Ownable {
 
         parts[4]= SVG.text(string(abi.encodePacked("180 100% ", (100-degree).toString(), "%")), 
                     "15",
-                    'x= "450" y="15"',
+                    450, 15,
                     string(abi.encodePacked(hourString, ":", minString)));
         parts[5]= SVG.tail();
         return string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]));
@@ -227,8 +226,8 @@ contract CityToken is Ownable {
                     // SVG Template, with rect backgroud
             parts[0]= SVG.head(font[tokenId],'700');
             parts[1]= SVG.rect('0 100% 100%'); // White
-            parts[2]= SVG.text('0, 0, 0%', "82", 'x= "100" y="239"', 'City');
-            parts[3]= SVG.text('0, 0, 0%', "39", 'x= "127" y="277"', 'Civilization');
+            parts[2]= SVG.text('0, 0, 0%', "82", 100, 239, 'City');
+            parts[3]= SVG.text('0, 0, 0%', "39", 127, 277, 'Civilization');
             parts[4]= SVG.tail();
             return string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4]));
         }
