@@ -1,7 +1,8 @@
+from operator import ne
 from scripts.city_functions import *
 
 def main():
-    active_network= "developmet"
+    active_network= network.show_active()
     print("Current Network:"+ active_network)
     
     (cities, cityDict)= init_city_data()

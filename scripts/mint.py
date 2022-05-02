@@ -46,11 +46,12 @@ def main():
                 city= CityToken.at(DEPLOYED_ADDR[active_network][1])
                 nft= CivCityNFT.at(DEPLOYED_ADDR[active_network][0])
 
+                nft.setPrices(0,0, addr(admin))
                 nft.setStep(3, addr(admin)) # public sale
                 for city in cities:
                     if os.path.exists(DATADIR+ 'svg/'+ city):
                         continue
-                    mint(city, cityDict, nft, admin, "0.02 ether")                
+                    mint(city, cityDict, nft, admin, "0")                
 
     except Exception:
         console.print_exception()
