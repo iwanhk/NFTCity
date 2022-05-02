@@ -102,6 +102,9 @@ def gen_group(meta_file:str)->None:
     id=0
     total_lans= len(lan_dict.keys())
 
+    if not os.path.exists('city_pic'):
+        os.mkdir('city_pic')
+
     group_dir=  meta_file[:-8].replace('city_meta', 'city_pic')
     if not os.path.exists(group_dir):
         os.mkdir(group_dir)
@@ -125,6 +128,6 @@ if __name__=="__main__":
                 print(os.path.join(path, file_name) )
                 cities.append(os.path.join(path, file_name))
 
-    #gen_group("city_meta/test.ot.json")
-    with ThreadPoolExecutor() as p:
-        p.map(gen_group, cities)
+    gen_group("city_meta/Miami.ot.json")
+    #with ThreadPoolExecutor() as p:
+    #    p.map(gen_group, cities)
