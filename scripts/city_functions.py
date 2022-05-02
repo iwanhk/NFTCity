@@ -96,22 +96,7 @@ def process_city(meta_file:str):
 
     print(f"{names_list=}")
     return (names_list, lan_list)
-
-def mint(city, cityDict, nft, user, price):
-    file_name=os.path.join(DATADIR+ "city_meta", city+'.ot.json')
-    names_list, lan_list= process_city(file_name)
-    city_name, zone, now_time= city_zone.query(city, cityDict)
-    if now_time==None:
-        print(f"{city} cannot be found in cityZone, pass")
-        return
-    #print(f"{now_time=}")
-
-    zoneDiff=int(now_time[-4:-2])*60+ int(now_time[-2:])
-    if now_time[-5]=='-':
-        zoneDiff= -zoneDiff
-    print(f"Minting NFT {city} ...")
-    nft.publicSaleMint(user, names_list, zoneDiff, lan_list, addr2(user, price))
-
+    
 def dump_svg(city, nft, index, user):
     # Dump SVG
     if not os.path.exists(DATADIR+ 'svg'):
@@ -137,11 +122,28 @@ def dump_svg(city, nft, index, user):
         with open(DATADIR+ 'svg/'+name+ "/"+ str(i).zfill(3)+ "."+lang+'.svg', 'w') as f:
             f.write(svg)
 
+# Simple mint is for dump out SVG files, we don't recoed
+def simple_mint(city, cityDict, nft, user, price):
+    file_name=os.path.join(DATADIR+ "city_meta", city+'.ot.json')
+    names_list, lan_list= process_city(file_name)
+    city_name, zone, now_time= city_zone.query(city, cityDict)
+    if now_time==None:
+        print(f"{city} cannot be found in cityZone, pass")
+        return
+    #print(f"{now_time=}")
+
+    zoneDiff=int(now_time[-4:-2])*60+ int(now_time[-2:])
+    if now_time[-5]=='-':
+        zoneDiff= -zoneDiff
+    print(f"Minting NFT {city} ...")
+    nft.publicSaleMint(user, names_list, zoneDiff, lan_list, addr2(user, price))
+
+
 def _get_meta(city, cityDict) -> tuple:
     if active_network in LOCAL_NETWORKS:
         pass
     else:
-        with open(DATADIR+ 'deployed.json', 'r') as deployed_file:
+        with open(DATADIR+ 'mint.json', 'r') as deployed_file:
             history= json.load(deployed_file)
         if city in history:
             print(f"{city} in history, pass")

@@ -51,9 +51,8 @@ def main():
                 #public_mint(cities[3], cityDict, nft, iwan, 0)
                 
                 for city in cities:
-                    if os.path.exists(DATADIR+ 'svg/'+ city):
-                        continue
-                    mint(city, cityDict, nft, admin, "0")                
+                    public_mint(cities[3], cityDict, nft, iwan, 0)  
+                                  
                 
     except Exception:
         console.print_exception()
