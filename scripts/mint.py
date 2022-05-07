@@ -46,13 +46,18 @@ def main():
                 city= CityToken.at(DEPLOYED_ADDR[active_network][1])
                 nft= CivCityNFT.at(DEPLOYED_ADDR[active_network][0])
 
-                nft.setPrices(0,0, addr(admin))
-                nft.setStep(3, addr(admin)) # public sale
-                #public_mint(cities[3], cityDict, nft, iwan, 0)
+                #nft.setPrices(0,0, addr(admin))
+                #nft.setStep(1, addr(admin)) # SoldOut
+                #gift(cities[0], cityDict, nft, iwan, admin)
+
                 
-                for city in cities:
-                    public_mint(cities[3], cityDict, nft, iwan, 0)  
-                                  
+                #nft.setPrices(0,0, addr(admin))
+                nft.setStep(3, addr(admin)) # public sale
+                public_mint(cities[3], cityDict, nft, iwan, 0)
+                
+                #for city in cities:
+                #    public_mint(cities[3], cityDict, nft, iwan, 0)  
+                                 
                 
     except Exception:
         console.print_exception()

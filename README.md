@@ -169,10 +169,11 @@ Key features:
 - Show current local time with black/white degree background
 - GIF animation provided (on/off)
 
-Smart Contract Functions (to tokenId):
+Smart Contract Functions:
 
 - setMainLang: set your own language
 - showAnimation: Show/Hide GIF Animation
+- setFont: set font-family
 
 root : 0x4a8d100c5b3c09841808d8fe60f6e7ce0812e6154420676e08030af0ad9b43fc
 

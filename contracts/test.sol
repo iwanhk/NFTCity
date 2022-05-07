@@ -5,6 +5,20 @@ pragma solidity ^0.8.0;
 import "./Random.sol";
 import "./DateTime.sol";
 
+import "./ERC721A.sol";
+
+contract ERCTest is  ERC721A{
+
+    constructor () ERC721A("Test", "TT"){}
+
+    function mint (
+        address to,
+        uint256 quantity
+    ) public {
+        _safeMint(to, quantity, "");
+    }
+}
+
 contract testArgList{
     struct City{
         string[] names;

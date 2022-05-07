@@ -24,7 +24,7 @@ def main():
         for c in cities:
             if os.path.exists(DATADIR+ 'svg/'+ c):
                 continue
-            mint(c, cityDict, nft, admin, "0")
+            (c, cityDict, nft, admin, "0")
         
         #mint(cities[0], cityDict, nft, admin)
 
