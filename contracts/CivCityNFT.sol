@@ -30,11 +30,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/finance/PaymentSplitter.sol";
-import "./ERC721A.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Pausable.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "../interfaces/ICityToken.sol";
 
 
-contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
+contract CivCityNFT is Ownable, PaymentSplitter, ERC1155, ERC1155Pausable {
   enum Step {
       Before,
       WhitelistSale,
@@ -51,11 +53,14 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   uint256 public publicSalePrice = 0.003 ether;
   uint256 private teamLength;
 
-  bytes32 public merkleRoot;
+  uint256 public globalId;
+
+  bytes32 private merkleRoot;
 
   ICityToken city;
 
   mapping(address => uint) public amountNFTsperWalletWhitelistSale;
+  mapping(string=> uint256) private nameIndex;
 
   modifier callerIsUser() {
       require(tx.origin == msg.sender, "The caller is another contract");
@@ -63,7 +68,7 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   }
 
   modifier tokenExist(uint256 tokenId) {
-      require(_exists(tokenId), "Nonexistent token");
+      require(tokenId>0 && tokenId< globalId, "Nonexistent token");
       _;
   }
   
@@ -73,12 +78,12 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
   }
 
   modifier reachTotalSupply() {
-      require(totalSupply() < MAX_SUPPLY, "Max supply exceeded");
+      require(globalId < MAX_SUPPLY, "Max supply exceeded");
       _;
   }
 
   modifier reachToalSpecial() {
-      require(totalSupply() < MAX_WHITELIST_AND_GIFT, "Max specail supply exceeded");
+      require(globalId < MAX_WHITELIST_AND_GIFT, "Max specail supply exceeded");
       _;
   }
 
@@ -91,45 +96,56 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
       require(sellingStep >= Step.PublicSale, "Not in public stage");
       _;
   }
-  constructor(address _city, address[] memory _team, uint[] memory _teamShares, bytes32 _merkleRoot) ERC721A("Civilization.Cities.NFT", "CC") 
+  constructor(address _city, address[] memory _team, uint[] memory _teamShares, bytes32 _merkleRoot) ERC1155('') 
   PaymentSplitter(_team, _teamShares) {
 
     city= ICityToken(_city);
     merkleRoot = _merkleRoot;
     teamLength = _team.length;
+    globalId= 1; // 0 is revered
   }
 
   function whitelistMint(address _account, 
-      bytes32[] calldata _proof,
-      string[] calldata _names, 
-      int _zoneDiff, 
-      uint8[] calldata _translate) external payable callerIsUser stepOne reachToalSpecial {
+    uint256 _amount,
+    bytes32[] calldata _proof,
+    string[] calldata _names, 
+    int _zoneDiff, 
+    uint8[] calldata _translate) external payable callerIsUser stepOne reachToalSpecial {
 
-      require(isWhiteListed(msg.sender, _proof), "Not whitelisted");
-      require(amountNFTsperWalletWhitelistSale[msg.sender] == 0, "You can only get 1 NFT on the Whitelist Sale");
-      require(msg.value >= wlSalePrice, "Not enought funds");
-      amountNFTsperWalletWhitelistSale[msg.sender] += 1;
+    require(isWhiteListed(msg.sender, _proof), "Not whitelisted");
+    require(amountNFTsperWalletWhitelistSale[msg.sender] == 0, "You can only get 1 NFT on the Whitelist Sale");
+    require(msg.value >= wlSalePrice, "Not enought funds");
+    amountNFTsperWalletWhitelistSale[msg.sender] += 1;
 
-      _safeMint(_account, _names, _zoneDiff, _translate);
+    _safeMint(_account, _amount, _names, _zoneDiff, _translate);
   }
 
   function gift(address _account,
-      string[] calldata _names, 
-      int _zoneDiff, 
-      uint8[] calldata _translate) external onlyOwner stepOne reachToalSpecial {
-      _safeMint(_account, _names, _zoneDiff, _translate);
+    uint256 _amount,
+    string[] calldata _names, 
+    int _zoneDiff, 
+    uint8[] calldata _translate) external onlyOwner stepOne reachToalSpecial {
+    _safeMint(_account, _amount, _names, _zoneDiff, _translate);
   }
-  function publicSaleMint(address _account,
-      string[] calldata _names, 
-      int _zoneDiff, 
-      uint8[] calldata _translate) external payable callerIsUser stepTwo reachTotalSupply {
-      require(msg.value >= publicSalePrice, "Not enought funds");
 
-      _safeMint(_account, _names, _zoneDiff, _translate);
+  function publicSaleMint(address _account,
+    uint256 _amount,
+    string[] calldata _names, 
+    int _zoneDiff, 
+    uint8[] calldata _translate) external payable callerIsUser stepTwo reachTotalSupply {
+    require(msg.value >= publicSalePrice, "Not enought funds");
+
+    _safeMint(_account, _amount, _names, _zoneDiff, _translate);
   }
-  function _safeMint(address to,string[] calldata _names, int _zoneDiff, uint8[] calldata _translate) internal {
-      city.mint(_names, _zoneDiff, _translate);
-      _safeMint(to, 1, '');
+  function _safeMint(address to, uint256 _amount, string[] calldata _names, int _zoneDiff, uint8[] calldata _translate) internal {
+      if(nameIndex[names[_translate[21]]]==0){
+        city.mint(_names, _zoneDiff, _translate);
+        _mint(to,id,amount,'');
+      }else{
+          // to mint an existing token
+
+
+      }
   }
 
   function currentTime() internal view returns(uint) {
@@ -177,7 +193,7 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
       revert('Only if you mint');
   }
 
-  function tokenURI(uint256 tokenId) public view virtual override 
+    function uri(uint256 tokenId) public override view 
     tokenExist(tokenId) returns (string memory){
     return city.tokenURI(tokenId, sellingStep == Step.Revealed);
   }
