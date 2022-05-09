@@ -23,7 +23,7 @@ TEST_NETWORKS = ['rinkeby', 'bsc-test', 'mumbai']
 REAL_NETWORKS = ['mainnet', 'polygon']
 DEPLOYED_ADDR = {  # Deployed address of CivCityNFT CityToken
     'rinkeby': ["0x22c1b71bf659a36fad8a476c3499964d2714c13b", "0x8525e4bf39ce1f5e9a3c4cd4fc29c39828edd8e9"],
-    'mumbai': ["0x15eE026824A8734902636f9903cd763346410772", "0x0B38eE28872684610F3a225F4672DbebE736a53c"]
+    'mumbai': ["0x4BaB2fA28165Ad3d3554d1AC3Dad0aFDEf161fe1", "0x510687fc5009eB8DF8376001113dDf279F868d1e"]
 }
 
 

@@ -41,6 +41,7 @@ interface ICityToken {
         string calldata font,
         uint8 mainLang,
         bool showAnimation,
+        uint256 amount,
         bool revealed
     ) external view returns (bytes memory);
 

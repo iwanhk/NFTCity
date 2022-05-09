@@ -37,6 +37,9 @@ import "./DateTime.sol";
 contract CityToken is Ownable {
     using Strings for uint256;
 
+    string constant META_DESCRIPTION =
+        '", "description":"The **Civilization City NFT**, dynamic, local time sensitive, programmable, rare!", "image_data": "';
+
     struct City {
         string[] names;
         int256 zoneDiff; // timezone diff in hours
@@ -48,6 +51,7 @@ contract CityToken is Ownable {
         string font;
         uint8 mainLang;
         bool showAnimation;
+        uint256 amount;
     }
     string[] public LANG = [
         "af",
@@ -183,6 +187,7 @@ contract CityToken is Ownable {
         string calldata font,
         uint8 mainLang,
         bool showAnimation,
+        uint256 amount,
         bool revealed
     ) external view onlyOwner returns (bytes memory) {
         if (revealed) {
@@ -190,7 +195,8 @@ contract CityToken is Ownable {
                 name,
                 font,
                 mainLang,
-                showAnimation
+                showAnimation,
+                amount
             );
 
             return _buildMetaData(argument);
@@ -338,7 +344,7 @@ contract CityToken is Ownable {
                 Base64.encode(
                     abi.encodePacked(
                         '{"name": "NOT REVEALED',
-                        '", "description":"The **Civilization City NFT**, dynamic, local time sensitive, programmable, rare!", "image_data": "',
+                        META_DESCRIPTION,
                         "data:image/svg+xml;base64,",
                         Base64.encode(
                             bytes(
@@ -363,7 +369,7 @@ contract CityToken is Ownable {
                                 )
                             )
                         ),
-                        '", "designer": "Dr Zu."}]}'
+                        '", "designer": "Dr Zu."}'
                     )
                 )
             );
@@ -431,7 +437,7 @@ contract CityToken is Ownable {
         bytes memory meta = abi.encodePacked(
             '{"name": "',
             city.names[city.translate[argument.mainLang]],
-            '", "description":"The **Civilization City NFT**, dynamic, local time sensitive, programmable, rare!", "image_data": "',
+            META_DESCRIPTION,
             "data:image/svg+xml;base64,",
             Base64.encode(
                 svgString(
@@ -444,13 +450,20 @@ contract CityToken is Ownable {
             ),
             '"',
             animation_url,
-            ', "designer": "Dr. Zu.", "attributes": [{"trait_type": "Names","value": "',
+            ', "designer": "Dr. Zu."'
+        );
+
+        meta = abi.encodePacked(
+            meta,
+            ', "attributes": [{"trait_type": "Names","value": "',
             uint256(city.names.length).toString(),
             '"},{"trait_type": "Main language","value": "',
             LANG[argument.mainLang],
             '"},{"trait_type": "Time Zone(UTC)","value": "',
             city.zoneDiff < 0 ? "-" : "+",
             timeString,
+            '"},{"trait_type": "Quantity","value": "',
+            argument.amount.toString(),
             '"}]}'
         );
 

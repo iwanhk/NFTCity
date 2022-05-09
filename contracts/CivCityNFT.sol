@@ -252,6 +252,7 @@ contract CivCityNFT is Ownable, ERC721A, PaymentSplitter {
                     nft[tokenId].font,
                     nft[tokenId].mainLang,
                     nft[tokenId].showAnimation,
+                    cityMap[nft[tokenId].name],
                     sellingStep == Step.Revealed
                 )
             );
