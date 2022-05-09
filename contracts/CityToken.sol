@@ -293,7 +293,7 @@ contract CityToken is Ownable {
                 )
             ),
             "70",
-            city.names[mainLang]
+            city.names[city.translate[mainLang]]
         );
         // Timestamp
         string memory hourString;
@@ -430,7 +430,7 @@ contract CityToken is Ownable {
 
         bytes memory meta = abi.encodePacked(
             '{"name": "',
-            city.names[argument.mainLang],
+            city.names[city.translate[argument.mainLang]],
             '", "description":"The **Civilization City NFT**, dynamic, local time sensitive, programmable, rare!", "image_data": "',
             "data:image/svg+xml;base64,",
             Base64.encode(
