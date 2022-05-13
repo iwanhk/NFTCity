@@ -54,13 +54,13 @@ def main():
             whitelist_mint(cities[1], cityDict, nft, consumer, 0)
             whitelist_mint(cities[0], cityDict, nft, creator, 0)
 
-            nft.setStep(2, addr(admin))  # 2= PublicSale
+            nft.setStep(3, addr(admin))  # 2= PublicSale
             public_mint(cities[2], cityDict, nft, iwan, 0, 2)
             public_mint(cities[0], cityDict, nft, creator, 0, 2)
             public_mint(cities[1], cityDict, nft, consumer, 0, 3)
+            public_mint(cities[0], cityDict, nft, consumer, 0, 1)
 
             nft.setIPFSPrefix(ipfs, addr(admin))
-            nft.setStep(3, addr(admin))
 
             # for city in cities:
             #    public_mint(cities[3], cityDict, nft, iwan, 0)
